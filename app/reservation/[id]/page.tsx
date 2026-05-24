@@ -31,7 +31,7 @@ type Reservation = {
   };
 };
 
-function useCountdown(targetDate: Date) {
+function useCountdown(targetDateString: string | undefined) {
   const [timeLeft, setTimeLeft] = useState({
     minutes: 0,
     seconds: 0,
@@ -39,9 +39,12 @@ function useCountdown(targetDate: Date) {
   });
 
   useEffect(() => {
+    const dateStr = targetDateString;
+    if (!dateStr) return;
+
     function calculateTimeLeft() {
       const now = new Date().getTime();
-      const target = new Date(targetDate).getTime();
+      const target = new Date(dateStr!).getTime();
       const difference = target - now;
 
       if (difference <= 0) {
@@ -61,7 +64,7 @@ function useCountdown(targetDate: Date) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [targetDateString]);
 
   return timeLeft;
 }
@@ -78,9 +81,7 @@ export default function ReservationPage({
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<"confirm" | "release" | null>(null);
 
-  const countdown = useCountdown(
-    reservation ? new Date(reservation.expiresAt) : new Date()
-  );
+  const countdown = useCountdown(reservation?.expiresAt);
 
   useEffect(() => {
     fetchReservation();
